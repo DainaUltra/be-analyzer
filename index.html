@@ -8,657 +8,833 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --navy: #0B1829;
-    --navy-mid: #152238;
-    --navy-light: #1E3350;
-    --panel: #f2f6fa;
-    --panel-dark: #e4ecf5;
-    --border: #c5d5e8;
-    --text: #0B1829;
-    --text-muted: #4a6080;
-    --teal: #0ea5c8;
-    --teal-dim: rgba(14,165,200,0.12);
-    --acid-red: #e03c52;
-    --acid-red-dim: rgba(224,60,82,0.12);
-    --base-green: #10a872;
-    --base-green-dim: rgba(16,168,114,0.12);
-    --ua-orange: #e07c1a;
-    --ua-orange-dim: rgba(224,124,26,0.12);
-    --neutral: #8899b0;
-    --radius: 10px;
-    --shadow: 0 2px 16px rgba(11,24,41,0.10);
-  }
+:root {
+  --navy:        #0B1829;
+  --navy-mid:    #152238;
+  --navy-light:  #1E3350;
+  --panel:       #f0f5fb;
+  --panel-dark:  #e2ecf6;
+  --border:      #c4d4e8;
+  --text:        #0d1f35;
+  --text-muted:  #4a6080;
+  --teal:        #0ea5c8;
+  --teal-dim:    rgba(14,165,200,0.13);
+  --red:         #e03c52;
+  --red-dim:     rgba(224,60,82,0.11);
+  --green:       #0fa86e;
+  --green-dim:   rgba(15,168,110,0.11);
+  --orange:      #e07c1a;
+  --orange-dim:  rgba(224,124,26,0.13);
+  --neutral:     #8899b0;
+  --radius:      10px;
+  --shadow:      0 2px 14px rgba(11,24,41,0.09);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--navy);
-    color: var(--text);
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
+/* ─── HEADER ─── */
+header {
+  background: var(--navy);
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+header h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--teal);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+header p {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  font-weight: 400;
+}
 
-  /* ─── HEADER ─── */
-  header {
-    background: var(--navy);
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-  }
-  header h1 {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--teal);
-    letter-spacing: -0.02em;
-  }
-  header p {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.38);
-    font-weight: 400;
-    letter-spacing: 0.01em;
-  }
+/* ─── LAYOUT ─── */
+main {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100vh - 52px);
+}
 
-  /* ─── LAYOUT ─── */
-  main {
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 0;
-    min-height: calc(100vh - 57px);
-  }
+/* ─── LEFT: INPUT PANEL ─── */
+.input-panel {
+  background: var(--navy-mid);
+  border-right: 1px solid rgba(255,255,255,0.07);
+  padding: 20px 18px 40px;
+  overflow-y: auto;
+}
 
-  /* ─── LEFT PANEL (inputs) ─── */
+.sec-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(14,165,200,0.18);
+  margin-top: 18px;
+}
+.sec-label:first-child { margin-top: 0; }
+
+.opt-hint {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.22);
+  margin-bottom: 10px;
+  margin-top: -4px;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-bottom: 4px;
+}
+.input-field { display: flex; flex-direction: column; gap: 3px; }
+.input-field.full { grid-column: 1 / -1; }
+
+.input-field label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.input-field label .unit {
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.22);
+  font-weight: 400;
+}
+.req-dot {
+  width: 5px; height: 5px;
+  background: var(--teal);
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.input-field input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 6px;
+  padding: 7px 9px;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.86rem;
+  font-weight: 600;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  -moz-appearance: textfield;
+}
+.input-field input::-webkit-outer-spin-button,
+.input-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.input-field input:focus {
+  border-color: var(--teal);
+  background: rgba(14,165,200,0.08);
+}
+.input-field input.opt-input {
+  border-style: dashed;
+  color: rgba(255,255,255,0.65);
+}
+.input-field input.opt-input::placeholder { color: rgba(255,255,255,0.2); }
+
+/* ─── RIGHT: OUTPUT PANEL ─── */
+.output-panel {
+  background: var(--panel);
+  padding: 20px 22px 48px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 80px 24px;
+  color: var(--text-muted);
+  text-align: center;
+  flex: 1;
+}
+.empty-icon { font-size: 2.2rem; opacity: 0.3; }
+.empty-title { font-size: 0.88rem; font-weight: 600; color: var(--text-muted); }
+.empty-sub {
+  font-size: 0.72rem;
+  color: var(--neutral);
+  line-height: 1.65;
+  max-width: 280px;
+}
+.req-list {
+  font-size: 0.68rem;
+  color: rgba(11,24,41,0.4);
+  background: var(--panel-dark);
+  border-radius: 7px;
+  padding: 10px 14px;
+  line-height: 1.8;
+  text-align: left;
+  margin-top: 4px;
+}
+
+/* ─── STATUS BADGES ─── */
+.status-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 13px;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1.5px solid var(--border);
+  min-width: 76px;
+}
+.badge-label {
+  font-size: 0.57rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.badge-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+.badge.b-acid  { border-color: var(--red);   background: var(--red-dim); }
+.badge.b-acid  .badge-val { color: var(--red); }
+.badge.b-base  { border-color: var(--green); background: var(--green-dim); }
+.badge.b-base  .badge-val { color: var(--green); }
+.badge.b-teal  { border-color: var(--teal);  background: var(--teal-dim); }
+.badge.b-teal  .badge-val { color: var(--teal); }
+
+/* ─── ALB WARNING ─── */
+.alb-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--orange-dim);
+  border: 1.5px solid var(--orange);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 0.75rem;
+  color: #6b3800;
+  line-height: 1.5;
+}
+.alb-warning .warn-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+/* ─── COMMENT SECTION ─── */
+.comment-card {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.comment-head {
+  background: var(--navy);
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.comment-head .ch-icon {
+  width: 20px; height: 20px;
+  background: var(--teal);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.comment-head .ch-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.04em;
+}
+.comment-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cpara {
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: #1a2d42;
+  padding: 10px 12px;
+  border-left: 3px solid var(--border);
+  border-radius: 0 6px 6px 0;
+  background: var(--panel);
+}
+.cpara.c-acid  { border-left-color: var(--red);    background: var(--red-dim); }
+.cpara.c-base  { border-left-color: var(--green);  background: var(--green-dim); }
+.cpara.c-ua    { border-left-color: var(--orange);  background: var(--orange-dim); }
+.cpara.c-ok    { border-left-color: var(--teal);   background: var(--teal-dim); }
+.cpara.c-warn  { border-left-color: #e0bb1a; background: rgba(224,187,26,0.1); }
+
+.cpara b      { font-weight: 600; color: var(--navy); }
+.cpara .v-acid { font-weight: 600; color: var(--red); }
+.cpara .v-base { font-weight: 600; color: var(--green); }
+.cpara .v-ua   { font-weight: 600; color: var(--orange); }
+.cpara .v-num  { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+/* ─── CHART CARD ─── */
+.chart-card {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.chart-wrap { position: relative; height: 250px; }
+
+/* ─── BREAKDOWN GRID ─── */
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+.factor-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  border-radius: 7px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+.factor-row.f-provisional {
+  border-style: dashed;
+  opacity: 0.75;
+}
+.fdot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.fname {
+  flex: 1;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+.fname small { font-size: 0.58rem; color: var(--neutral); display: block; }
+.fval {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.fval.pos { color: var(--green); }
+.fval.neg { color: var(--red); }
+.fval.neu { color: var(--neutral); }
+.fval.uacolor { color: var(--orange); }
+
+/* ─── TOTAL ROW ─── */
+.total-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 13px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+}
+.total-row .fname { color: rgba(255,255,255,0.7); font-size: 0.72rem; }
+.total-row .fval  { font-size: 0.88rem; }
+
+/* ─── FOOTER ─── */
+.footer-note {
+  font-size: 0.61rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding-top: 4px;
+  line-height: 1.6;
+}
+
+/* ─── MOBILE ─── */
+@media (max-width: 700px) {
+  header { padding: 13px 16px 11px; }
+  main { grid-template-columns: 1fr; }
   .input-panel {
-    background: var(--navy-mid);
-    border-right: 1px solid rgba(255,255,255,0.07);
-    padding: 22px 20px 32px;
-    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 16px 14px 24px;
   }
-
-  .section-label {
-    font-size: 0.635rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    color: var(--teal);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    padding-bottom: 7px;
-    border-bottom: 1px solid rgba(14,165,200,0.18);
-  }
-
-  .input-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-
-  .input-field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .input-field.full { grid-column: 1 / -1; }
-
-  .input-field label {
-    font-size: 0.68rem;
-    font-weight: 500;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 0.02em;
-  }
-
-  .input-field .unit {
-    font-size: 0.6rem;
-    color: rgba(255,255,255,0.25);
-    font-weight: 400;
-  }
-
-  .input-field input {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    padding: 8px 10px;
-    color: #fff;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
-    font-weight: 600;
-    width: 100%;
-    transition: border-color 0.15s, background 0.15s;
-    outline: none;
-    -moz-appearance: textfield;
-  }
-  .input-field input::-webkit-outer-spin-button,
-  .input-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-  .input-field input:focus {
-    border-color: var(--teal);
-    background: rgba(14,165,200,0.08);
-  }
-  .input-field input.optional {
-    border-style: dashed;
-    color: rgba(255,255,255,0.7);
-  }
-
-  .opt-note {
-    font-size: 0.62rem;
-    color: rgba(255,255,255,0.22);
-    margin-bottom: 10px;
-    margin-top: -6px;
-  }
-
-  /* ─── RIGHT PANEL (output) ─── */
-  .output-panel {
-    background: var(--panel);
-    padding: 22px 24px 40px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  /* ─── STATUS BAR ─── */
-  .status-bar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .badge {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 9px 14px;
-    border-radius: var(--radius);
-    background: #fff;
-    border: 1.5px solid var(--border);
-    min-width: 80px;
-  }
-  .badge .badge-label {
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    text-transform: uppercase;
-  }
-  .badge .badge-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1;
-  }
-  .badge.acidemia { border-color: var(--acid-red); background: var(--acid-red-dim); }
-  .badge.acidemia .badge-val { color: var(--acid-red); }
-  .badge.alkalemia { border-color: var(--base-green); background: var(--base-green-dim); }
-  .badge.alkalemia .badge-val { color: var(--base-green); }
-  .badge.neutral-ph { border-color: var(--teal); }
-
-  /* ─── CHART CARD ─── */
-  .card {
-    background: #fff;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 20px;
-    box-shadow: var(--shadow);
-  }
-  .card-title {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-
-  .chart-wrap {
-    position: relative;
-    height: 260px;
-  }
-
-  /* ─── BREAKDOWN TABLE ─── */
-  .breakdown-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .factor-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
-    border-radius: 7px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-  }
-  .factor-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .factor-name {
-    flex: 1;
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: var(--text-muted);
-  }
-  .factor-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    font-weight: 600;
-  }
-  .factor-val.pos { color: var(--base-green); }
-  .factor-val.neg { color: var(--acid-red); }
-  .factor-val.neutral { color: var(--neutral); }
-
-  /* ─── BE GAUGE ─── */
-  .be-gauge-wrap {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  .be-gauge {
-    flex: 1;
-    min-width: 180px;
-  }
-  .be-number-display {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 120px;
-  }
-  .be-number-display .big-be {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 2.6rem;
-    font-weight: 600;
-    line-height: 1;
-  }
-  .be-number-display .big-be.acid { color: var(--acid-red); }
-  .be-number-display .big-be.base { color: var(--base-green); }
-  .be-number-display .big-be.norm { color: var(--teal); }
-  .be-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 500; }
-  .be-explain-sum {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-
-  /* BE stacked bar */
-  .stacked-bar-container {
-    height: 38px;
-    border-radius: 6px;
-    overflow: hidden;
-    display: flex;
-    background: #e9eff6;
-    position: relative;
-    margin-top: 6px;
-  }
-  .stacked-bar-container .zero-line {
-    position: absolute;
-    top: 0; bottom: 0;
-    width: 2px;
-    background: rgba(11,24,41,0.25);
-    z-index: 2;
-  }
-  .stacked-seg {
-    height: 100%;
-    transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  /* ─── COMMENT SECTION ─── */
-  .comment-section {
-    background: #fff;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-  .comment-header {
-    background: var(--navy);
-    padding: 10px 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .comment-header .icon {
-    width: 22px;
-    height: 22px;
-    background: var(--teal);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    color: #fff;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .comment-header .ch-title {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: rgba(255,255,255,0.7);
-    letter-spacing: 0.04em;
-  }
-  .comment-body {
-    padding: 16px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .comment-para {
-    font-size: 0.82rem;
-    line-height: 1.7;
-    color: #1e2d42;
-    padding: 10px 12px;
-    border-left: 3px solid var(--border);
-    border-radius: 0 5px 5px 0;
-    background: var(--panel);
-  }
-  .comment-para.highlight-acid { border-left-color: var(--acid-red); background: var(--acid-red-dim); }
-  .comment-para.highlight-base { border-left-color: var(--base-green); background: var(--base-green-dim); }
-  .comment-para.highlight-ua { border-left-color: var(--ua-orange); background: var(--ua-orange-dim); }
-  .comment-para.highlight-ok { border-left-color: var(--teal); background: var(--teal-dim); }
-  .emph { font-weight: 600; color: var(--navy); }
-  .emph.acid { color: var(--acid-red); }
-  .emph.base { color: var(--base-green); }
-  .emph.ua { color: var(--ua-orange); }
-
-  /* ─── FOOTER NOTE ─── */
-  /* ─── EMPTY STATE ─── */
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 60px 24px;
-    color: var(--text-muted);
-    text-align: center;
-  }
-  .empty-state .empty-icon {
-    font-size: 2.4rem;
-    opacity: 0.35;
-  }
-  .empty-state .empty-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-muted);
-  }
-  .empty-state .empty-sub {
-    font-size: 0.75rem;
-    color: var(--neutral);
-    line-height: 1.6;
-    max-width: 260px;
-  }
-  .required-hint {
-    font-size: 0.62rem;
-    color: rgba(255,255,255,0.22);
-    margin-top: 6px;
-  }
-
-  .footer-note {
-    font-size: 0.64rem;
-    color: var(--text-muted);
-    text-align: center;
-    padding-top: 8px;
-    line-height: 1.5;
-  }
-
-  /* ─── MOBILE ─── */
-  @media (max-width: 720px) {
-    header { padding: 14px 16px 12px; flex-direction: column; gap: 3px; }
-    main { grid-template-columns: 1fr; }
-    .input-panel { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 18px 16px 24px; }
-    .output-panel { padding: 18px 16px 32px; }
-    .breakdown-grid { grid-template-columns: 1fr; }
-    .status-bar .badge { flex: 1; min-width: 60px; }
-  }
-
-  @media (max-width: 380px) {
-    .badge .badge-val { font-size: 0.95rem; }
-    .be-number-display .big-be { font-size: 2rem; }
-  }
+  .output-panel { padding: 16px 14px 36px; }
+  .breakdown-grid { grid-template-columns: 1fr; }
+  .status-bar .badge { flex: 1; min-width: 60px; }
+}
 </style>
 </head>
 <body>
 
 <header>
   <h1>BE / Stewart Approach Analyzer</h1>
-  <p>簡易版Fencl-Stewart法による塩基過剰の因数分解ツール</p>
+  <p>簡易版Fencl-Stewart法 — 指導医コメント自動生成</p>
 </header>
 
 <main>
-  <!-- ─── INPUT PANEL ─── -->
+  <!-- ═══ INPUT PANEL ═══ -->
   <aside class="input-panel">
-    <div class="section-label">血液ガス分析</div>
-    <div class="required-hint" style="margin-bottom:10px; margin-top:-6px;">※ pH・BE・Na・Cl・Alb・Lac は必須項目です</div>
-    <div class="input-grid" style="margin-bottom:20px;">
+
+    <div class="sec-label">血液ガス（必須）</div>
+    <div class="input-grid">
       <div class="input-field">
-        <label>pH <span class="unit"></span></label>
-        <input type="number" id="pH" step="0.001" placeholder="7.40">
+        <label><span class="req-dot"></span>pH</label>
+        <input type="number" id="i_pH"   step="0.001" placeholder="7.40">
       </div>
       <div class="input-field">
-        <label>PaCO₂ <span class="unit">mmHg</span></label>
-        <input type="number" id="pco2" step="0.1" placeholder="40">
+        <label><span class="req-dot"></span>PaCO₂ <span class="unit">mmHg</span></label>
+        <input type="number" id="i_pco2" step="0.1"   placeholder="40">
+      </div>
+      <div class="input-field">
+        <label><span class="req-dot"></span>BE <span class="unit">mEq/L</span></label>
+        <input type="number" id="i_be"   step="0.1"   placeholder="0">
       </div>
       <div class="input-field">
         <label>HCO₃⁻ <span class="unit">mEq/L</span></label>
-        <input type="number" id="hco3" step="0.1" placeholder="24">
-      </div>
-      <div class="input-field">
-        <label>BE <span class="unit">mEq/L</span></label>
-        <input type="number" id="be" step="0.1" placeholder="0">
+        <input type="number" id="i_hco3" step="0.1"   placeholder="24" class="opt-input">
       </div>
     </div>
 
-    <div class="section-label">電解質・生化学</div>
-    <div class="input-grid" style="margin-bottom:20px;">
-      <div class="input-field">
-        <label>Na <span class="unit">mEq/L</span></label>
-        <input type="number" id="na" step="1" placeholder="140">
-      </div>
-      <div class="input-field">
-        <label>K <span class="unit">mEq/L</span></label>
-        <input type="number" id="k" step="0.1" placeholder="4.0">
-      </div>
-      <div class="input-field">
-        <label>Cl <span class="unit">mEq/L</span></label>
-        <input type="number" id="cl" step="1" placeholder="103">
-      </div>
-      <div class="input-field">
-        <label>Alb <span class="unit">g/dL</span></label>
-        <input type="number" id="alb" step="0.1" placeholder="4.2">
-      </div>
-      <div class="input-field full">
-        <label>Lac（乳酸） <span class="unit">mmol/L</span></label>
-        <input type="number" id="lac" step="0.1" placeholder="1.0">
-      </div>
-    </div>
-
-    <div class="section-label">オプション電解質</div>
-    <div class="opt-note">空白のままでも計算します（Mg: 2.0 で固定）</div>
+    <div class="sec-label">電解質（必須）</div>
     <div class="input-grid">
       <div class="input-field">
-        <label>Mg <span class="unit">mg/dL</span></label>
-        <input type="number" id="mg" step="0.1" placeholder="例: 2.0" class="optional">
+        <label><span class="req-dot"></span>Na <span class="unit">mEq/L</span></label>
+        <input type="number" id="i_na"   step="1"     placeholder="140">
       </div>
       <div class="input-field">
-        <label>Ca <span class="unit">mg/dL</span></label>
-        <input type="number" id="ca" step="0.1" placeholder="例: 9.0" class="optional">
+        <label><span class="req-dot"></span>K <span class="unit">mEq/L</span></label>
+        <input type="number" id="i_k"    step="0.1"   placeholder="4.0">
+      </div>
+      <div class="input-field">
+        <label><span class="req-dot"></span>Cl <span class="unit">mEq/L</span></label>
+        <input type="number" id="i_cl"   step="1"     placeholder="103">
+      </div>
+      <div class="input-field">
+        <label><span class="req-dot"></span>Lac <span class="unit">mmol/L</span></label>
+        <input type="number" id="i_lac"  step="0.1"   placeholder="1.0">
+      </div>
+      <div class="input-field full">
+        <label><span class="req-dot"></span>Glu（血糖） <span class="unit">mg/dL</span></label>
+        <input type="number" id="i_glu"  step="1"     placeholder="100">
+      </div>
+    </div>
+
+    <div class="sec-label">追加項目（オプション）</div>
+    <div class="opt-hint">未入力でも計算は進みます。後で入力可能です。</div>
+    <div class="input-grid">
+      <div class="input-field full">
+        <label>Alb（アルブミン） <span class="unit">g/dL</span></label>
+        <input type="number" id="i_alb"  step="0.1"   placeholder="4.0（未入力=仮計算）" class="opt-input">
+      </div>
+      <div class="input-field">
+        <label>Mg <span class="unit">mg/dL</span></label>
+        <input type="number" id="i_mg"   step="0.1"   placeholder="2.0" class="opt-input">
       </div>
       <div class="input-field">
         <label>P（リン） <span class="unit">mg/dL</span></label>
-        <input type="number" id="ph_p" step="0.1" placeholder="例: 3.5" class="optional">
+        <input type="number" id="i_p"    step="0.1"   placeholder="3.5" class="opt-input">
       </div>
     </div>
+
   </aside>
 
-  <!-- ─── OUTPUT PANEL ─── -->
-  <section class="output-panel">
+  <!-- ═══ OUTPUT PANEL ═══ -->
+  <section class="output-panel" id="outputPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🩺</div>
+      <div class="empty-title">必須項目を入力してください</div>
+      <div class="empty-sub">数値が揃うと、指導医コメントと因数分解グラフが表示されます。</div>
+      <div class="req-list">
+        必須：pH　／　PaCO₂　／　BE<br>
+        Na　／　K　／　Cl　／　Lac　／　Glu（血糖）
+      </div>
+    </div>
 
-    <!-- Status badges -->
-    <div class="status-bar" id="statusBar"></div>
+    <!-- 以下は計算後に表示 -->
+    <div id="resultArea" style="display:none; display:none; flex-direction:column; gap:16px;">
 
-    <!-- BE breakdown display -->
-    <div class="card">
-      <div class="card-title">BE 因数分解サマリー</div>
-      <div class="be-gauge-wrap">
-        <div class="be-number-display">
-          <div class="big-be" id="bigBE">—</div>
-          <div class="be-label">Base Excess (mEq/L)</div>
-          <div class="be-explain-sum" id="explainSum"></div>
+      <!-- ① STATUS BAR -->
+      <div class="status-bar" id="statusBar"></div>
+
+      <!-- ALB WARNING -->
+      <div class="alb-warning" id="albWarning" style="display:none;">
+        <span class="warn-icon">⚠️</span>
+        <span>Alb 未入力のため <b>4.0 g/dL</b>（正常下限）で仮計算中。<br>Alb を入力すると正確な評価が得られます。</span>
+      </div>
+
+      <!-- ② COMMENT -->
+      <div class="comment-card">
+        <div class="comment-head">
+          <div class="ch-icon">指</div>
+          <div class="ch-title">指導医コメント（自動生成）</div>
         </div>
-        <div class="be-gauge" id="beGaugeWrap">
-          <div class="stacked-bar-container" id="stackedBar"></div>
-          <div style="font-size:0.62rem; color:var(--text-muted); margin-top:6px; text-align:right;">← アシドーシス要因 ｜ アルカローシス要因 →</div>
+        <div class="comment-body" id="commentBody"></div>
+      </div>
+
+      <!-- ③ CHART -->
+      <div class="chart-card">
+        <div class="card-title">BE 因数分解 ウォーターフォールチャート</div>
+        <div class="chart-wrap">
+          <canvas id="wfChart"></canvas>
         </div>
       </div>
-    </div>
 
-    <!-- Factor breakdown grid -->
-    <div class="card">
-      <div class="card-title">各要因の寄与 (mEq/L)</div>
-      <div class="breakdown-grid" id="breakdownGrid"></div>
-    </div>
+      <!-- ④ BREAKDOWN -->
+      <div class="chart-card">
+        <div class="card-title">各要因の寄与（mEq/L）</div>
+        <div class="breakdown-grid" id="breakdownGrid"></div>
+      </div>
 
-    <!-- Waterfall chart -->
-    <div class="card">
-      <div class="card-title">ウォーターフォールチャート</div>
-      <div class="chart-wrap">
-        <canvas id="wfChart"></canvas>
+      <div class="footer-note">
+        Story DA et al. BJA 2004 / 定本・早川 泌尿器外科 2020 に基づく教育・学習用ツールです。臨床判断の補助としてご使用ください。
       </div>
     </div>
-
-    <!-- Attending comment -->
-    <div class="comment-section" id="commentSection">
-      <div class="comment-header">
-        <div class="icon">指</div>
-        <div class="ch-title">指導医コメント（自動生成）</div>
-      </div>
-      <div class="comment-body" id="commentBody"></div>
-    </div>
-
-    <div class="footer-note">
-      本ツールは簡易版Fencl-Stewart法に基づく教育・学習用ツールです。臨床判断の補助として使用してください。<br>
-      Mg効果 = (2.0 − Mg) × 2　　未測定陰イオン(UA) = 入力BE − 説明可能な総和
-    </div>
-
   </section>
 </main>
 
 <script>
-// ─── CHART INSTANCE ───
-let wfChartInstance = null;
+// ─── Chart instance ───
+let wfChart = null;
 
-// ─── COLORS ───
-const C = {
-  naCl:  '#0ea5c8',
-  alb:   '#10a872',
-  lac:   '#e03c52',
-  k:     '#8b5cf6',
-  mg:    '#f59e0b',
-  ua:    '#e07c1a',
-  zero:  '#c5d5e8',
-  pos:   '#10a872',
-  neg:   '#e03c52',
+// ─── Color map ───
+const CLR = {
+  naCl: '#0ea5c8',
+  alb:  '#0fa86e',
+  lac:  '#e03c52',
+  k:    '#8b5cf6',
+  mg:   '#f59e0b',
+  ua:   '#e07c1a',
+  be:   '#1e3350',
+  pos:  '#0fa86e',
+  neg:  '#e03c52',
 };
 
-// ─── COLLECT INPUTS ───
-function getInputs() {
-  const v = id => {
-    const el = document.getElementById(id);
-    const val = parseFloat(el.value);
-    return isNaN(val) ? null : val;
-  };
+// ─── Read inputs ───
+function getVal(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? null : v;
+}
+
+function readInputs() {
   return {
-    pH:  v('pH')   ?? 7.40,
-    pco2:v('pco2') ?? 40,
-    hco3:v('hco3') ?? 24,
-    be:  v('be')   ?? 0,
-    na:  v('na')   ?? 140,
-    k:   v('k')    ?? 4.0,
-    cl:  v('cl')   ?? 103,
-    alb: v('alb')  ?? 4.2,
-    lac: v('lac')  ?? 1.0,
-    mg:  v('mg'),   // nullable
-    ca:  v('ca'),   // nullable (not used in formula currently)
-    p:   v('ph_p'), // nullable
+    pH:   getVal('i_pH'),
+    pco2: getVal('i_pco2'),
+    be:   getVal('i_be'),
+    hco3: getVal('i_hco3'),   // optional
+    na:   getVal('i_na'),
+    k:    getVal('i_k'),
+    cl:   getVal('i_cl'),
+    lac:  getVal('i_lac'),
+    glu:  getVal('i_glu'),
+    alb:  getVal('i_alb'),    // optional
+    mg:   getVal('i_mg'),     // optional
+    p:    getVal('i_p'),      // optional (unused in calc)
   };
 }
 
-// ─── COMPUTE ───
-function compute(inp) {
-  const mgVal = inp.mg ?? 2.0;
-
-  const naCl = (inp.na - inp.cl) - 38;
-  const albE = 2.5 * (4.2 - inp.alb);
-  const lacE = -inp.lac;
-  const kE   = 4.0 - inp.k;
-  const mgE  = (2.0 - mgVal) * 2;
-
-  const explained = naCl + albE + lacE + kE + mgE;
-  const ua = inp.be - explained;
-
-  return { naCl, albE, lacE, kE, mgE, explained, ua, mgVal };
+// ─── Check required ───
+function hasRequired(d) {
+  return [d.pH, d.pco2, d.be, d.na, d.k, d.cl, d.lac, d.glu]
+    .every(v => v !== null);
 }
 
-// ─── WATERFALL CHART ───
-function buildWaterfall(inp, res) {
-  const labels = ['Na-Cl', 'Alb', '乳酸', 'K', 'Mg', 'UA', 'BE(実測)'];
-  const factors = [res.naCl, res.albE, res.lacE, res.kE, res.mgE, res.ua, null];
-  const colors  = [C.naCl, C.alb, C.lac, C.k, C.mg, C.ua, null];
+// ─── Compute ───
+function compute(d) {
+  const albVal = d.alb !== null ? d.alb : 4.0;
+  const mgVal  = d.mg  !== null ? d.mg  : 2.0;
+  const albProvisional = d.alb === null;
 
-  // Build waterfall: each bar is [base, value]
-  // We track running sum for the waterfall
-  const baseData = [];
-  const barData  = [];
-  const barColors = [];
-  let running = 0;
+  const naCl = (d.na - d.cl) - 38;
+  const alb  = 2.5 * (4.0 - albVal);
+  const lac  = -d.lac;
+  const k    = 4.0 - d.k;
+  const mg   = (2.0 - mgVal) * 2;
 
-  for (let i = 0; i < 6; i++) {
-    const v = factors[i];
-    const base = v < 0 ? running + v : running;
-    baseData.push(base);
-    barData.push(Math.abs(v));
-    barColors.push(v >= 0 ? C.pos : C.neg);
-    running += v;
+  const explained = naCl + alb + lac + k + mg;
+  const ua = d.be - explained;
+
+  // Winter's formula (only if HCO3 entered)
+  let winter = null;
+  if (d.hco3 !== null && d.pco2 !== null) {
+    const expected = 1.5 * d.hco3 + 8;
+    const low  = expected - 2;
+    const high = expected + 2;
+    let status;
+    if (d.pco2 < low)       status = 'under';  // 呼吸性アルカローシス合併
+    else if (d.pco2 > high) status = 'over';   // 呼吸性アシドーシス合併
+    else                    status = 'ok';
+    winter = { expected, low, high, status };
   }
-  // Final bar: actual BE
-  const beBase = inp.be < 0 ? inp.be : 0;
-  baseData.push(beBase);
-  barData.push(Math.abs(inp.be));
-  barColors.push(inp.be >= 0 ? 'rgba(11,24,41,0.7)' : 'rgba(11,24,41,0.5)');
+
+  return { naCl, alb, lac, k, mg, explained, ua, albVal, mgVal, albProvisional, winter };
+}
+
+// ─── Format helpers ───
+const s  = (v, d=2) => (v >= 0 ? '+' : '') + v.toFixed(d);
+const abs2 = v => Math.abs(v).toFixed(2);
+
+// ─── Status bar ───
+function buildStatus(d) {
+  const pH = d.pH, be = d.be, pco2 = d.pco2;
+  let phCls = '', phLbl = '正常域';
+  if (pH < 7.35) { phCls = 'b-acid'; phLbl = 'アシデミア'; }
+  else if (pH > 7.45) { phCls = 'b-base'; phLbl = 'アルカレミア'; }
+
+  let beCls = '', beLbl = '正常';
+  if (be < -2) { beCls = 'b-acid'; beLbl = '代謝性Ac'; }
+  else if (be > 2) { beCls = 'b-base'; beLbl = '代謝性Alk'; }
+
+  let pcoCls = '', pcoLbl = '正常換気';
+  if (pco2 < 35) { pcoCls = 'b-base'; pcoLbl = '過換気'; }
+  else if (pco2 > 45) { pcoCls = 'b-acid'; pcoLbl = '低換気'; }
+
+  document.getElementById('statusBar').innerHTML = `
+    <div class="badge ${phCls}">
+      <span class="badge-label">pH</span>
+      <span class="badge-val">${pH.toFixed(3)}</span>
+    </div>
+    <div class="badge ${phCls}" style="min-width:90px">
+      <span class="badge-label">pH 判定</span>
+      <span class="badge-val" style="font-size:0.78rem">${phLbl}</span>
+    </div>
+    <div class="badge ${beCls}">
+      <span class="badge-label">BE</span>
+      <span class="badge-val">${s(be,1)}</span>
+    </div>
+    <div class="badge ${pcoCls}">
+      <span class="badge-label">PaCO₂</span>
+      <span class="badge-val">${pco2.toFixed(1)}</span>
+    </div>
+  `;
+}
+
+// ─── Comment builder ───
+function buildComment(d, r) {
+  const paras = [];
+
+  // ── 段落1：全体評価 ──
+  const phWord = d.pH < 7.35 ? '<span class="v-acid">アシデミア</span>'
+               : d.pH > 7.45 ? '<span class="v-base">アルカレミア</span>'
+               : '正常域';
+  const beWord = d.be < -2 ? '<span class="v-acid">代謝性アシドーシス</span>'
+               : d.be > 2  ? '<span class="v-base">代謝性アルカローシス</span>'
+               : '代謝成分は正常範囲';
+  const pcoWord = d.pco2 < 35
+    ? '<span class="v-base">過換気域</span>（呼吸性代償または呼吸性アルカローシス）'
+    : d.pco2 > 45
+    ? '<span class="v-acid">低換気域</span>（呼吸性アシドーシスまたは代償不全）'
+    : '正常換気域';
+  const p1cls = d.pH < 7.35 ? 'c-acid' : d.pH > 7.45 ? 'c-base' : '';
+  paras.push({ cls: p1cls, html:
+    `pHは <span class="v-num">${d.pH.toFixed(3)}</span> で${phWord}です。` +
+    `BEは <span class="v-num">${s(d.be,1)} mEq/L</span> であり、${beWord}の状態です。` +
+    `PaCO₂は <span class="v-num">${d.pco2.toFixed(1)} mmHg</span> で${pcoWord}です。`
+  });
+
+  // ── 段落2：Winterの公式（HCO3入力時のみ） ──
+  if (r.winter) {
+    const w = r.winter;
+    const statusText = w.status === 'ok'
+      ? '適切な呼吸性代償の<b>範囲内</b>です。'
+      : w.status === 'under'
+      ? '<span class="v-base">期待値より低く</span>、呼吸性アルカローシスの<b>合併が疑われます</b>。'
+      : '<span class="v-acid">期待値より高く</span>、呼吸性アシドーシスの合併または<b>代償不全が疑われます</b>。';
+    const wcls = w.status === 'ok' ? 'c-ok'
+               : w.status === 'under' ? 'c-base' : 'c-acid';
+    paras.push({ cls: wcls, html:
+      `HCO₃⁻は <span class="v-num">${d.hco3.toFixed(1)} mEq/L</span> であるため、` +
+      `Winterの公式から期待PaCO₂は <span class="v-num">${w.low.toFixed(1)}〜${w.high.toFixed(1)} mmHg</span> となります。<br>` +
+      `実測PaCO₂（<span class="v-num">${d.pco2.toFixed(1)} mmHg</span>）は${statusText}`
+    });
+  }
+
+  // ── 段落3：BE因数分解 ──
+  const naClDir = r.naCl < -1
+    ? `→ 相対的な<span class="v-acid">高Cl性アシドーシス要因</span>`
+    : r.naCl > 1
+    ? `→ <span class="v-base">低Cl性（高Na-Cl差）アルカローシス要因</span>`
+    : `→ Na-Clバランスはほぼ正常範囲`;
+  const albDir = r.alb > 1
+    ? `→ <span class="v-base">低アルブミン血症によるアルカローシス要因</span>` + (r.albProvisional ? ' <span style="color:var(--orange);font-size:0.75em;">（仮計算）</span>' : '')
+    : `→ Albは正常範囲（効果ほぼゼロ）`;
+
+  paras.push({ cls: '', html:
+    `BEの値を因数分解して考えてみましょう。<br><br>` +
+    `・<b>Na-Cl効果</b>：(${d.na} − ${d.cl}) − 38 ＝ <span class="v-num">${s(r.naCl)} mEq/L</span>　${naClDir}<br>` +
+    `・<b>Alb効果</b>：2.5 × (4.0 − ${r.albVal.toFixed(1)}) ＝ <span class="v-num">${s(r.alb)} mEq/L</span>　${albDir}<br>` +
+    `・<b>乳酸効果</b>：−${d.lac.toFixed(1)} ＝ <span class="v-num">${s(r.lac)} mEq/L</span>　→ <span class="v-acid">アシドーシス要因</span><br>` +
+    `・<b>K効果</b>：4.0 − ${d.k.toFixed(1)} ＝ <span class="v-num">${s(r.k)} mEq/L</span><br>` +
+    `・<b>Mg効果</b>：(2.0 − ${r.mgVal.toFixed(1)}) × 2 ＝ <span class="v-num">${s(r.mg)} mEq/L</span><br><br>` +
+    `これらの<b>説明可能な要因の総和</b>は <span class="v-num">${s(r.explained)} mEq/L</span> です。`
+  });
+
+  // ── 段落4：UA解釈 ──
+  let uaPara = '', uaCls = '';
+  if (r.ua >= -2 && r.ua <= 2) {
+    uaCls = 'c-ok';
+    uaPara =
+      `実際のBE（<span class="v-num">${s(d.be,1)} mEq/L</span>）と説明可能な総和（<span class="v-num">${s(r.explained)} mEq/L</span>）は` +
+      `ほぼ一致しており、未測定陰イオン（UA）は <span class="v-num">${s(r.ua)} mEq/L</span> と誤差範囲内です。<br>` +
+      `測定された電解質・代謝物でBEがほぼ<b>説明できます</b>。ケトン体などの特殊な酸の蓄積は少ないと推測します。`;
+  } else if (r.ua < -2 && r.ua >= -5) {
+    uaCls = 'c-ua';
+    uaPara =
+      `実際のBE（<span class="v-num">${s(d.be,1)} mEq/L</span>）に対し、説明可能な総和は <span class="v-num">${s(r.explained)} mEq/L</span> であり、` +
+      `<span class="v-ua">${abs2(r.ua)} mEq/L 分の乖離</span>（未測定陰イオンによるアシドーシス要因）があります。<br>` +
+      `<b>軽度〜中等度の未測定陰イオンの存在</b>が示唆されます。<br>` +
+      `ケトン体・腎不全・特殊中毒（サリチル酸・メタノール・エチレングリコール等）の鑑別を検討してください。<br>` +
+      `血中ケトン体・BUN/Cr・トキシコロジーの検索を考慮します。`;
+  } else if (r.ua < -5) {
+    uaCls = 'c-ua';
+    uaPara =
+      `実際のBE（<span class="v-num">${s(d.be,1)} mEq/L</span>）と説明可能な総和（<span class="v-num">${s(r.explained)} mEq/L</span>）の乖離は` +
+      `<span class="v-ua">${abs2(r.ua)} mEq/L と<b>高度</b></span>です。<br>` +
+      `大量の未測定陰イオンが蓄積しており、<b>早急な精査が必要です</b>。<br>` +
+      `DKA・AKA・重症腎不全・特殊中毒を積極的に鑑別してください。`;
+  } else {
+    // UA > +2
+    uaCls = 'c-base';
+    uaPara =
+      `UAが正方向（<span class="v-num">${s(r.ua)} mEq/L</span>）に乖離しています。<br>` +
+      `アルカローシス要因が説明可能な量を超えており、臨床文脈と合わせて解釈してください。`;
+  }
+  paras.push({ cls: uaCls, html: uaPara });
+
+  // ── 段落5：DKA/AKA評価 ──
+  if (d.glu !== null && r.ua <= -3) {
+    let dkaPara = '', dkaCls = 'c-ua';
+    if (d.glu >= 250) {
+      dkaPara =
+        `血糖が <span class="v-num">${d.glu} mg/dL</span> と高値であり、未測定陰イオンも <span class="v-ua">${s(r.ua)} mEq/L</span> と陰性です。<br>` +
+        `<b>糖尿病性ケトアシドーシス（DKA）を強く疑います。</b><br>` +
+        `血中ケトン体の確認と、輸液・インスリン投与の検討が必要です。`;
+    } else {
+      dkaPara =
+        `血糖は <span class="v-num">${d.glu} mg/dL</span> と高値ではありませんが、未測定陰イオンは <span class="v-ua">${s(r.ua)} mEq/L</span> と陰性です。<br>` +
+        `<b>アルコール性ケトアシドーシス（AKA）・飢餓性ケトアシドーシス</b>や、腎不全・特殊中毒も鑑別に挙げてください。<br>` +
+        `血中ケトン体・BUN/Cr・飲酒歴の確認を検討してください。`;
+    }
+    paras.push({ cls: dkaCls, html: dkaPara });
+  }
+
+  // ── 段落6：臨床的ポイント ──
+  const points = [];
+  if (d.pH < 7.20) {
+    points.push(`⚠️ <b>重篤なアシデミア（pH ${d.pH.toFixed(3)}）</b>です。緊急対応を検討してください。`);
+  }
+  if (r.naCl < -5) {
+    points.push(`高Cl性代謝性アシドーシスの要素が大きい（Na-Cl効果 ${s(r.naCl)} mEq/L）。大量生食輸液・下痢・腎尿細管性アシドーシス（RTA）を考慮。`);
+  }
+  if (r.alb > 3) {
+    points.push(`低アルブミン血症がアルカローシス（Alb効果 ${s(r.alb)} mEq/L）を作り出しており、真のアシドーシスを見かけ上マスクしている可能性があります。`);
+  }
+  if (d.lac > 4) {
+    points.push(`乳酸 <b>${d.lac.toFixed(1)} mmol/L</b> は重篤な組織低灌流を示す高値です。緊急の原因検索・循環管理が必要です。`);
+  } else if (d.lac > 2) {
+    points.push(`乳酸 <b>${d.lac.toFixed(1)} mmol/L</b> は組織低灌流・敗血症・肝不全等を示唆します。原因検索と治療介入が必要です。`);
+  }
+  if (points.length > 0) {
+    paras.push({ cls: 'c-warn', html:
+      `<b>臨床的重要ポイント</b><br>` +
+      points.map(p => `・${p}`).join('<br>')
+    });
+  }
+
+  // Render
+  document.getElementById('commentBody').innerHTML =
+    paras.map(p => `<div class="cpara ${p.cls}">${p.html}</div>`).join('');
+}
+
+// ─── Waterfall chart ───
+function buildChart(d, r) {
+  const factors = [
+    { label: 'Na-Cl', val: r.naCl },
+    { label: 'Alb',   val: r.alb  },
+    { label: '乳酸',  val: r.lac  },
+    { label: 'K',     val: r.k    },
+    { label: 'Mg',    val: r.mg   },
+    { label: 'UA',    val: r.ua   },
+  ];
+
+  // Build waterfall: invisible base + visible bar
+  const baseData = [], barData = [], colors = [];
+  let running = 0;
+  factors.forEach((f, i) => {
+    const base = f.val < 0 ? running + f.val : running;
+    baseData.push(base);
+    barData.push(Math.abs(f.val));
+    if (i === 5) colors.push(f.val < 0 ? CLR.ua : CLR.ua); // UA always orange
+    else colors.push(f.val >= 0 ? CLR.pos : CLR.neg);
+    running += f.val;
+  });
+  // BE actual bar
+  baseData.push(d.be < 0 ? d.be : 0);
+  barData.push(Math.abs(d.be));
+  colors.push(CLR.be);
+
+  const labels = [...factors.map(f => f.label), 'BE実測'];
+  const origVals = [...factors.map(f => f.val), d.be];
 
   const ctx = document.getElementById('wfChart').getContext('2d');
-  if (wfChartInstance) wfChartInstance.destroy();
+  if (wfChart) wfChart.destroy();
 
-  wfChartInstance = new Chart(ctx, {
+  wfChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
       datasets: [
         {
-          label: 'base (invisible)',
+          label: 'base',
           data: baseData,
           backgroundColor: 'transparent',
           borderColor: 'transparent',
+          stack: 'wf',
           borderWidth: 0,
-          stack: 's1',
         },
         {
           label: '寄与 (mEq/L)',
           data: barData,
-          backgroundColor: barColors,
+          backgroundColor: colors,
           borderRadius: 4,
           borderSkipped: false,
-          stack: 's1',
+          stack: 'wf',
         }
       ]
     },
@@ -668,12 +844,11 @@ function buildWaterfall(inp, res) {
       plugins: {
         legend: { display: false },
         tooltip: {
+          filter: item => item.datasetIndex === 1,
           callbacks: {
-            label: (ctx) => {
-              if (ctx.datasetIndex === 0) return null;
-              const idx = ctx.dataIndex;
-              const orig = idx < 6 ? factors[idx] : inp.be;
-              return ` ${orig >= 0 ? '+' : ''}${orig.toFixed(2)} mEq/L`;
+            label: ctx => {
+              const v = origVals[ctx.dataIndex];
+              return ` ${s(v)} mEq/L`;
             }
           },
           backgroundColor: '#0B1829',
@@ -683,7 +858,7 @@ function buildWaterfall(inp, res) {
           borderWidth: 1,
           padding: 10,
           titleFont: { family: 'JetBrains Mono', size: 12 },
-          bodyFont: { family: 'JetBrains Mono', size: 12 },
+          bodyFont:  { family: 'JetBrains Mono', size: 12 },
         }
       },
       scales: {
@@ -694,11 +869,11 @@ function buildWaterfall(inp, res) {
         },
         y: {
           stacked: true,
-          grid: { color: 'rgba(197,213,232,0.4)', lineWidth: 1 },
+          grid: { color: 'rgba(197,213,232,0.35)' },
           ticks: {
             font: { family: 'JetBrains Mono', size: 10 },
             color: '#4a6080',
-            callback: v => (v > 0 ? '+' : '') + v
+            callback: v => (v > 0 ? '+' : '') + v,
           },
           border: { dash: [3,3] },
         }
@@ -707,253 +882,74 @@ function buildWaterfall(inp, res) {
   });
 }
 
-// ─── STATUS BADGES ───
-function buildStatus(inp) {
-  const pH = inp.pH;
-  let phClass = 'neutral-ph', phLabel = '正常域';
-  if (pH < 7.35) { phClass = 'acidemia'; phLabel = 'アシデミア'; }
-  else if (pH > 7.45) { phClass = 'alkalemia'; phLabel = 'アルカレミア'; }
-
-  let beClass = 'badge', beLabel = '正常';
-  if (inp.be < -2) { beClass = 'badge acidemia'; beLabel = '代謝性アシドーシス'; }
-  else if (inp.be > 2) { beClass = 'badge alkalemia'; beLabel = '代謝性アルカローシス'; }
-
-  let ventClass = 'badge', ventLabel = '正常換気';
-  if (inp.pco2 < 35) { ventClass = 'badge alkalemia'; ventLabel = '過換気'; }
-  else if (inp.pco2 > 45) { ventClass = 'badge acidemia'; ventLabel = '低換気'; }
-
-  document.getElementById('statusBar').innerHTML = `
-    <div class="badge ${phClass}">
-      <span class="badge-label">pH</span>
-      <span class="badge-val">${pH.toFixed(3)}</span>
-    </div>
-    <div class="${beClass}">
-      <span class="badge-label">BE</span>
-      <span class="badge-val">${inp.be > 0 ? '+' : ''}${inp.be.toFixed(1)}</span>
-    </div>
-    <div class="badge">
-      <span class="badge-label">PaCO₂</span>
-      <span class="badge-val">${inp.pco2.toFixed(0)}</span>
-    </div>
-    <div class="badge">
-      <span class="badge-label">HCO₃⁻</span>
-      <span class="badge-val">${inp.hco3.toFixed(1)}</span>
-    </div>
-  `;
-}
-
-// ─── BE SUMMARY ───
-function buildBESummary(inp, res) {
-  const be = inp.be;
-  const beEl = document.getElementById('bigBE');
-  beEl.textContent = (be > 0 ? '+' : '') + be.toFixed(1);
-  beEl.className = 'big-be ' + (be < -2 ? 'acid' : be > 2 ? 'base' : 'norm');
-
-  document.getElementById('explainSum').textContent =
-    `説明可能な総和: ${res.explained >= 0 ? '+' : ''}${res.explained.toFixed(2)} mEq/L`;
-
-  // Stacked bar
-  const total = Math.max(Math.abs(be) + 2, 10);
-  const factors = [
-    { val: res.naCl, col: C.naCl  },
-    { val: res.albE, col: C.alb   },
-    { val: res.lacE, col: C.lac   },
-    { val: res.kE,   col: C.k     },
-    { val: res.mgE,  col: C.mg    },
-    { val: res.ua,   col: C.ua    },
-  ];
-  const container = document.getElementById('stackedBar');
-  // zero line position = 50% if balanced, else clamp
-  const zeroAt = 50; // We normalize around zero
-
-  // Build segments
-  const pos = factors.filter(f => f.val > 0);
-  const neg = factors.filter(f => f.val < 0);
-  const posSum = pos.reduce((a, f) => a + f.val, 0);
-  const negSum = Math.abs(neg.reduce((a, f) => a + f.val, 0));
-  const scale = (val) => (Math.abs(val) / total) * 100;
-
-  let html = '';
-  // Zero line at midpoint of range
-  const maxAbs = Math.max(posSum, negSum, Math.abs(be), 1);
-  const zeroPct = (negSum / (negSum + posSum + 0.001)) * 100;
-
-  // Negative factors left side
-  neg.forEach(f => {
-    html += `<div class="stacked-seg" style="width:${scale(f.val)}%;background:${f.col};opacity:0.85;"></div>`;
-  });
-  // Gap (zero)
-  const gapW = 100 - neg.reduce((a, f) => a + scale(f.val), 0) - pos.reduce((a, f) => a + scale(f.val), 0);
-  if (gapW > 0) html += `<div class="stacked-seg" style="width:${gapW}%;background:#e4ecf5;"></div>`;
-  // Positive factors right side
-  pos.forEach(f => {
-    html += `<div class="stacked-seg" style="width:${scale(f.val)}%;background:${f.col};opacity:0.85;"></div>`;
-  });
-  container.innerHTML = html;
-}
-
-// ─── FACTOR BREAKDOWN GRID ───
-function buildBreakdownGrid(inp, res) {
+// ─── Breakdown grid ───
+function buildBreakdown(d, r) {
   const rows = [
-    { name: 'Na-Cl バランス', val: res.naCl, col: C.naCl, detail: `(${inp.na}−${inp.cl})−38` },
-    { name: 'Alb 補正',       val: res.albE, col: C.alb,  detail: `2.5×(4.2−${inp.alb})` },
-    { name: '乳酸',           val: res.lacE, col: C.lac,  detail: `−${inp.lac}` },
-    { name: 'K',              val: res.kE,   col: C.k,    detail: `4.0−${inp.k}` },
-    { name: 'Mg',             val: res.mgE,  col: C.mg,   detail: `(2.0−${res.mgVal})×2` },
-    { name: '未測定陰イオン(UA)', val: res.ua, col: C.ua, detail: `BE−説明可能` },
+    { label: 'Na-Cl バランス', sub: `(${d.na}−${d.cl})−38`, val: r.naCl, col: CLR.naCl, prov: false },
+    { label: 'Alb 補正',       sub: `2.5×(4.0−${r.albVal.toFixed(1)})`, val: r.alb, col: CLR.alb, prov: r.albProvisional },
+    { label: '乳酸',           sub: `−${d.lac.toFixed(1)}`,              val: r.lac, col: CLR.lac, prov: false },
+    { label: 'K',              sub: `4.0−${d.k.toFixed(1)}`,             val: r.k,   col: CLR.k,   prov: false },
+    { label: 'Mg',             sub: `(2.0−${r.mgVal.toFixed(1)})×2`,     val: r.mg,  col: CLR.mg,  prov: d.mg === null },
+    { label: '未測定陰イオン (UA)', sub: `BE − 説明可能な総和`,           val: r.ua,  col: CLR.ua,  prov: false, isUA: true },
   ];
 
-  document.getElementById('breakdownGrid').innerHTML = rows.map(r => {
-    const cls = r.val > 0.1 ? 'pos' : r.val < -0.1 ? 'neg' : 'neutral';
-    const sign = r.val > 0 ? '+' : '';
+  const cls = v => v > 0.05 ? 'pos' : v < -0.05 ? 'neg' : 'neu';
+
+  const rowsHTML = rows.map(row => {
+    const valCls = row.isUA ? 'uacolor' : cls(row.val);
+    const provCls = row.prov ? 'f-provisional' : '';
     return `
-      <div class="factor-row">
-        <div class="factor-dot" style="background:${r.col};"></div>
-        <div class="factor-name">${r.name}<br><span style="font-size:0.6rem;color:#8899b0;">${r.detail}</span></div>
-        <div class="factor-val ${cls}">${sign}${r.val.toFixed(2)}</div>
-      </div>
-    `;
+      <div class="factor-row ${provCls}">
+        <div class="fdot" style="background:${row.col}"></div>
+        <div class="fname">${row.label}<small>${row.sub}${row.prov ? ' ⚠️仮' : ''}</small></div>
+        <div class="fval ${valCls}">${s(row.val)}</div>
+      </div>`;
   }).join('');
+
+  const totalCls = r.explained > 0.05 ? 'pos' : r.explained < -0.05 ? 'neg' : 'neu';
+  const totalHTML = `
+    <div class="total-row">
+      <div class="fdot" style="background:#c5d5e8;border:2px solid #8899b0;"></div>
+      <div class="fname">説明可能な総和<small>上記5要因の合計</small></div>
+      <div class="fval ${totalCls}">${s(r.explained)}</div>
+    </div>`;
+
+  document.getElementById('breakdownGrid').innerHTML = rowsHTML + totalHTML;
 }
 
-// ─── GENERATE COMMENT ───
-function buildComment(inp, res) {
-  const pH = inp.pH;
-  const be = inp.be;
-  const be_s = (be >= 0 ? '+' : '') + be.toFixed(1);
-  const exp_s = (res.explained >= 0 ? '+' : '') + res.explained.toFixed(2);
-  const ua_s  = (res.ua >= 0 ? '+' : '') + res.ua.toFixed(2);
-
-  // 1. pH and BE status
-  let phStatus = 'pH 7.35〜7.45 の正常域';
-  let phCls = '';
-  if (pH < 7.35) { phStatus = `<span class="emph acid">アシデミア</span>`; phCls = 'highlight-acid'; }
-  else if (pH > 7.45) { phStatus = `<span class="emph base">アルカレミア</span>`; phCls = 'highlight-base'; }
-
-  let beStatus = '正常範囲';
-  if (be < -2) beStatus = `<span class="emph acid">代謝性アシドーシス</span>`;
-  else if (be > 2) beStatus = `<span class="emph base">代謝性アルカローシス</span>`;
-
-  let pco2Comment = '';
-  if (inp.pco2 < 35) pco2Comment = `PaCO₂ <span class="emph base">${inp.pco2} mmHg</span> と低値であり、呼吸性代償（または呼吸性アルカローシス）を伴っています。`;
-  else if (inp.pco2 > 45) pco2Comment = `PaCO₂ <span class="emph acid">${inp.pco2} mmHg</span> と高値であり、呼吸性アシドーシスまたは代謝性アルカローシスへの代償が示唆されます。`;
-  else pco2Comment = `PaCO₂ ${inp.pco2} mmHg は正常換気域であり、呼吸性成分の寄与は最小限です。`;
-
-  const para1 = `
-    pHは <span class="emph">${pH.toFixed(3)}</span>、BEは <span class="emph">${be_s} mEq/L</span> であり、${phStatus} です（代謝成分の評価として ${beStatus}）。${pco2Comment}
-  `;
-
-  // 2. Factor breakdown
-  const factLines = [];
-  const fmt = (v) => (v >= 0 ? '+' : '') + v.toFixed(2);
-  const dir = (v, label) => {
-    if (Math.abs(v) < 0.1) return `${label} の寄与はほぼゼロ（${fmt(v)} mEq/L）`;
-    const dir_word = v > 0 ? `<span class="emph base">アルカローシス要因</span>` : `<span class="emph acid">アシドーシス要因</span>`;
-    return `${label} により ${dir_word} <span class="emph">${fmt(v)} mEq/L</span>`;
-  };
-
-  factLines.push(dir(res.naCl, `Na-Cl バランス（Na=${inp.na}, Cl=${inp.cl}）`));
-  if (inp.alb !== 4.2) factLines.push(dir(res.albE, `低アルブミン血症（Alb=${inp.alb} g/dL）`));
-  else factLines.push(`Alb は正常値（4.2 g/dL）のため Alb 効果はゼロ`);
-  factLines.push(dir(res.lacE, `乳酸（${inp.lac} mmol/L）`));
-  if (Math.abs(res.kE) > 0.1) factLines.push(dir(res.kE, `K（${inp.k} mEq/L）`));
-  if (inp.mg !== null && Math.abs(res.mgE) > 0.1) factLines.push(dir(res.mgE, `Mg（${inp.mg} mg/dL）`));
-
-  const para2 = `要因の因数分解を行うと：<br><br>` + factLines.map(l => `・${l}`).join('<br>') + `<br><br>説明可能な要因の総和は <span class="emph">${exp_s} mEq/L</span> となります。`;
-
-  // 3. UA interpretation
-  const uaAbs = Math.abs(res.ua);
-  let para3 = '', para3cls = '';
-  if (uaAbs < 2) {
-    para3 = `実際の BE（<span class="emph">${be_s}</span>）と説明可能な要因（<span class="emph">${exp_s}</span>）の差は <span class="emph">${ua_s} mEq/L</span> と誤差範囲内です。<strong>測定された電解質・代謝物でほぼ説明がつきます。</strong>追加の未測定陰イオン蓄積を積極的に疑う必要はありません。`;
-    para3cls = 'highlight-ok';
-  } else if (res.ua < -2) {
-    const severity = uaAbs > 8 ? '高度' : uaAbs > 4 ? '中等度' : '軽度';
-    para3 = `実際の BE（<span class="emph">${be_s}</span>）と説明可能な要因（<span class="emph">${exp_s}</span>）を比較すると、<span class="emph ua">${ua_s} mEq/L</span> の差（${severity}な未測定陰イオンによるアシドーシス要因）があります。<br><br>これはケトン体・尿毒症性有機酸・サリチル酸・メタノール代謝産物などの<strong>特殊な陰イオンの蓄積</strong>を示唆します。血中ケトン体・BUN/Cr・トキシコロジーの検索を検討してください。`;
-    para3cls = 'highlight-ua';
-  } else {
-    para3 = `実際の BE（<span class="emph">${be_s}</span>）と説明可能な要因（<span class="emph">${exp_s}</span>）の差は <span class="emph">${ua_s} mEq/L</span> であり、軽度の未説明陽イオン過剰が示唆されます。臨床文脈と合わせて判断してください。`;
-    para3cls = 'highlight-ok';
-  }
-
-  // 4. Clinical synthesis
-  let para4 = '';
-  const isHyperCl = res.naCl < -3;
-  const isHypoAlb = res.albE > 2;
-  const isHighLac = inp.lac > 2;
-  const hasUA = res.ua < -3;
-
-  const features = [];
-  if (isHyperCl) features.push('高Cl性代謝性アシドーシス（例：大量生食輸液、下痢、腎尿細管性アシドーシス）');
-  if (isHypoAlb) features.push('低アルブミン血症によるアルカローシス寄与（真のアシドーシスを見かけ上マスクしている可能性）');
-  if (isHighLac) features.push(`乳酸アシドーシスの要素（Lac=${inp.lac} mmol/L）`);
-  if (hasUA) features.push('未測定陰イオンによるアシドーシス（ケトアシドーシス・尿毒症等を鑑別）');
-
-  if (features.length > 0) {
-    para4 = `臨床的な重要ポイント：<br>` + features.map(f => `・${f}`).join('<br>');
-  }
-
-  const commentBody = document.getElementById('commentBody');
-  commentBody.innerHTML = [
-    `<div class="comment-para ${phCls}">${para1}</div>`,
-    `<div class="comment-para">${para2}</div>`,
-    `<div class="comment-para ${para3cls}">${para3}</div>`,
-    para4 ? `<div class="comment-para">${para4}</div>` : '',
-  ].join('');
-}
-
-// ─── REQUIRED FIELDS CHECK ───
-function hasAllRequired() {
-  const required = ['pH', 'be', 'na', 'cl', 'alb', 'lac'];
-  return required.every(id => {
-    const v = parseFloat(document.getElementById(id).value);
-    return !isNaN(v);
-  });
-}
-
-// ─── EMPTY STATE ───
-function showEmptyState() {
-  document.getElementById('statusBar').innerHTML = '';
-  document.getElementById('bigBE').textContent = '—';
-  document.getElementById('bigBE').className = 'big-be norm';
-  document.getElementById('explainSum').textContent = '';
-  document.getElementById('stackedBar').innerHTML = '';
-  document.getElementById('breakdownGrid').innerHTML = '';
-  document.getElementById('commentBody').innerHTML = `
-    <div class="empty-state">
-      <div class="empty-icon">🩺</div>
-      <div class="empty-title">数値を入力してください</div>
-      <div class="empty-sub">pH・BE・Na・Cl・Alb・Lac を入力すると、BEの因数分解と指導医コメントが表示されます。</div>
-    </div>
-  `;
-  if (wfChartInstance) { wfChartInstance.destroy(); wfChartInstance = null; }
-  // Clear chart canvas
-  const canvas = document.getElementById('wfChart');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-// ─── MAIN RENDER ───
+// ─── Main render ───
 function render() {
-  if (!hasAllRequired()) {
-    showEmptyState();
+  const d = readInputs();
+  const empty = document.getElementById('emptyState');
+  const result = document.getElementById('resultArea');
+
+  if (!hasRequired(d)) {
+    empty.style.display = 'flex';
+    result.style.display = 'none';
     return;
   }
-  const inp = getInputs();
-  const res = compute(inp);
-  buildStatus(inp);
-  buildBESummary(inp, res);
-  buildBreakdownGrid(inp, res);
-  buildComment(inp, res);
-  buildWaterfall(inp, res);
+
+  empty.style.display = 'none';
+  result.style.display = 'flex';
+
+  const r = compute(d);
+
+  // Alb warning
+  document.getElementById('albWarning').style.display =
+    r.albProvisional ? 'flex' : 'none';
+
+  buildStatus(d);
+  buildComment(d, r);
+  buildChart(d, r);
+  buildBreakdown(d, r);
 }
 
-// ─── EVENT LISTENERS ───
-document.querySelectorAll('input').forEach(el => {
-  el.addEventListener('input', () => { render(); });
-});
+// ─── Events ───
+document.querySelectorAll('input').forEach(el =>
+  el.addEventListener('input', render)
+);
 
-// ─── INIT ───
+// ─── Init ───
 render();
 </script>
 </body>
