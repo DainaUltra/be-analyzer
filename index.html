@@ -371,6 +371,38 @@
   .emph.ua { color: var(--ua-orange); }
 
   /* ─── FOOTER NOTE ─── */
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 24px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  .empty-state .empty-icon {
+    font-size: 2.4rem;
+    opacity: 0.35;
+  }
+  .empty-state .empty-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .empty-state .empty-sub {
+    font-size: 0.75rem;
+    color: var(--neutral);
+    line-height: 1.6;
+    max-width: 260px;
+  }
+  .required-hint {
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.22);
+    margin-top: 6px;
+  }
+
   .footer-note {
     font-size: 0.64rem;
     color: var(--text-muted);
@@ -406,22 +438,23 @@
   <!-- ─── INPUT PANEL ─── -->
   <aside class="input-panel">
     <div class="section-label">血液ガス分析</div>
+    <div class="required-hint" style="margin-bottom:10px; margin-top:-6px;">※ pH・BE・Na・Cl・Alb・Lac は必須項目です</div>
     <div class="input-grid" style="margin-bottom:20px;">
       <div class="input-field">
         <label>pH <span class="unit"></span></label>
-        <input type="number" id="pH" step="0.001" value="7.320">
+        <input type="number" id="pH" step="0.001" placeholder="7.40">
       </div>
       <div class="input-field">
         <label>PaCO₂ <span class="unit">mmHg</span></label>
-        <input type="number" id="pco2" step="0.1" value="38.0">
+        <input type="number" id="pco2" step="0.1" placeholder="40">
       </div>
       <div class="input-field">
         <label>HCO₃⁻ <span class="unit">mEq/L</span></label>
-        <input type="number" id="hco3" step="0.1" value="19.0">
+        <input type="number" id="hco3" step="0.1" placeholder="24">
       </div>
       <div class="input-field">
         <label>BE <span class="unit">mEq/L</span></label>
-        <input type="number" id="be" step="0.1" value="-8.0">
+        <input type="number" id="be" step="0.1" placeholder="0">
       </div>
     </div>
 
@@ -429,23 +462,23 @@
     <div class="input-grid" style="margin-bottom:20px;">
       <div class="input-field">
         <label>Na <span class="unit">mEq/L</span></label>
-        <input type="number" id="na" step="1" value="140">
+        <input type="number" id="na" step="1" placeholder="140">
       </div>
       <div class="input-field">
         <label>K <span class="unit">mEq/L</span></label>
-        <input type="number" id="k" step="0.1" value="4.0">
+        <input type="number" id="k" step="0.1" placeholder="4.0">
       </div>
       <div class="input-field">
         <label>Cl <span class="unit">mEq/L</span></label>
-        <input type="number" id="cl" step="1" value="115">
+        <input type="number" id="cl" step="1" placeholder="103">
       </div>
       <div class="input-field">
         <label>Alb <span class="unit">g/dL</span></label>
-        <input type="number" id="alb" step="0.1" value="2.5">
+        <input type="number" id="alb" step="0.1" placeholder="4.2">
       </div>
       <div class="input-field full">
         <label>Lac（乳酸） <span class="unit">mmol/L</span></label>
-        <input type="number" id="lac" step="0.1" value="2.0">
+        <input type="number" id="lac" step="0.1" placeholder="1.0">
       </div>
     </div>
 
@@ -869,8 +902,43 @@ function buildComment(inp, res) {
   ].join('');
 }
 
+// ─── REQUIRED FIELDS CHECK ───
+function hasAllRequired() {
+  const required = ['pH', 'be', 'na', 'cl', 'alb', 'lac'];
+  return required.every(id => {
+    const v = parseFloat(document.getElementById(id).value);
+    return !isNaN(v);
+  });
+}
+
+// ─── EMPTY STATE ───
+function showEmptyState() {
+  document.getElementById('statusBar').innerHTML = '';
+  document.getElementById('bigBE').textContent = '—';
+  document.getElementById('bigBE').className = 'big-be norm';
+  document.getElementById('explainSum').textContent = '';
+  document.getElementById('stackedBar').innerHTML = '';
+  document.getElementById('breakdownGrid').innerHTML = '';
+  document.getElementById('commentBody').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">🩺</div>
+      <div class="empty-title">数値を入力してください</div>
+      <div class="empty-sub">pH・BE・Na・Cl・Alb・Lac を入力すると、BEの因数分解と指導医コメントが表示されます。</div>
+    </div>
+  `;
+  if (wfChartInstance) { wfChartInstance.destroy(); wfChartInstance = null; }
+  // Clear chart canvas
+  const canvas = document.getElementById('wfChart');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
 // ─── MAIN RENDER ───
 function render() {
+  if (!hasAllRequired()) {
+    showEmptyState();
+    return;
+  }
   const inp = getInputs();
   const res = compute(inp);
   buildStatus(inp);
