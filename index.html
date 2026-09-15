@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BE因数分解 — Stewart Approach Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #0B1829;
+    --navy-mid: #152238;
+    --navy-light: #1E3350;
+    --panel: #f2f6fa;
+    --panel-dark: #e4ecf5;
+    --border: #c5d5e8;
+    --text: #0B1829;
+    --text-muted: #4a6080;
+    --teal: #0ea5c8;
+    --teal-dim: rgba(14,165,200,0.12);
+    --acid-red: #e03c52;
+    --acid-red-dim: rgba(224,60,82,0.12);
+    --base-green: #10a872;
+    --base-green-dim: rgba(16,168,114,0.12);
+    --ua-orange: #e07c1a;
+    --ua-orange-dim: rgba(224,124,26,0.12);
+    --neutral: #8899b0;
+    --radius: 10px;
+    --shadow: 0 2px 16px rgba(11,24,41,0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--navy);
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: -0.02em;
+  }
+  header p {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.38);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  /* ─── LAYOUT ─── */
+  main {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 57px);
+  }
+
+  /* ─── LEFT PANEL (inputs) ─── */
+  .input-panel {
+    background: var(--navy-mid);
+    border-right: 1px solid rgba(255,255,255,0.07);
+    padding: 22px 20px 32px;
+    overflow-y: auto;
+  }
+
+  .section-label {
+    font-size: 0.635rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid rgba(14,165,200,0.18);
+  }
+
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .input-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .input-field.full { grid-column: 1 / -1; }
+
+  .input-field label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.02em;
+  }
+
+  .input-field .unit {
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.25);
+    font-weight: 400;
+  }
+
+  .input-field input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    font-weight: 600;
+    width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .input-field input::-webkit-outer-spin-button,
+  .input-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .input-field input:focus {
+    border-color: var(--teal);
+    background: rgba(14,165,200,0.08);
+  }
+  .input-field input.optional {
+    border-style: dashed;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .opt-note {
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.22);
+    margin-bottom: 10px;
+    margin-top: -6px;
+  }
+
+  /* ─── RIGHT PANEL (output) ─── */
+  .output-panel {
+    background: var(--panel);
+    padding: 22px 24px 40px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ─── STATUS BAR ─── */
+  .status-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 9px 14px;
+    border-radius: var(--radius);
+    background: #fff;
+    border: 1.5px solid var(--border);
+    min-width: 80px;
+  }
+  .badge .badge-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .badge .badge-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+  .badge.acidemia { border-color: var(--acid-red); background: var(--acid-red-dim); }
+  .badge.acidemia .badge-val { color: var(--acid-red); }
+  .badge.alkalemia { border-color: var(--base-green); background: var(--base-green-dim); }
+  .badge.alkalemia .badge-val { color: var(--base-green); }
+  .badge.neutral-ph { border-color: var(--teal); }
+
+  /* ─── CHART CARD ─── */
+  .card {
+    background: #fff;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 260px;
+  }
+
+  /* ─── BREAKDOWN TABLE ─── */
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .factor-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+  }
+  .factor-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .factor-name {
+    flex: 1;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .factor-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .factor-val.pos { color: var(--base-green); }
+  .factor-val.neg { color: var(--acid-red); }
+  .factor-val.neutral { color: var(--neutral); }
+
+  /* ─── BE GAUGE ─── */
+  .be-gauge-wrap {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .be-gauge {
+    flex: 1;
+    min-width: 180px;
+  }
+  .be-number-display {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 120px;
+  }
+  .be-number-display .big-be {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.6rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .be-number-display .big-be.acid { color: var(--acid-red); }
+  .be-number-display .big-be.base { color: var(--base-green); }
+  .be-number-display .big-be.norm { color: var(--teal); }
+  .be-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 500; }
+  .be-explain-sum {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* BE stacked bar */
+  .stacked-bar-container {
+    height: 38px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    background: #e9eff6;
+    position: relative;
+    margin-top: 6px;
+  }
+  .stacked-bar-container .zero-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(11,24,41,0.25);
+    z-index: 2;
+  }
+  .stacked-seg {
+    height: 100%;
+    transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ─── COMMENT SECTION ─── */
+  .comment-section {
+    background: #fff;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .comment-header {
+    background: var(--navy);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .comment-header .icon {
+    width: 22px;
+    height: 22px;
+    background: var(--teal);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: #fff;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .comment-header .ch-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.04em;
+  }
+  .comment-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .comment-para {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #1e2d42;
+    padding: 10px 12px;
+    border-left: 3px solid var(--border);
+    border-radius: 0 5px 5px 0;
+    background: var(--panel);
+  }
+  .comment-para.highlight-acid { border-left-color: var(--acid-red); background: var(--acid-red-dim); }
+  .comment-para.highlight-base { border-left-color: var(--base-green); background: var(--base-green-dim); }
+  .comment-para.highlight-ua { border-left-color: var(--ua-orange); background: var(--ua-orange-dim); }
+  .comment-para.highlight-ok { border-left-color: var(--teal); background: var(--teal-dim); }
+  .emph { font-weight: 600; color: var(--navy); }
+  .emph.acid { color: var(--acid-red); }
+  .emph.base { color: var(--base-green); }
+  .emph.ua { color: var(--ua-orange); }
+
+  /* ─── FOOTER NOTE ─── */
+  .footer-note {
+    font-size: 0.64rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 720px) {
+    header { padding: 14px 16px 12px; flex-direction: column; gap: 3px; }
+    main { grid-template-columns: 1fr; }
+    .input-panel { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 18px 16px 24px; }
+    .output-panel { padding: 18px 16px 32px; }
+    .breakdown-grid { grid-template-columns: 1fr; }
+    .status-bar .badge { flex: 1; min-width: 60px; }
+  }
+
+  @media (max-width: 380px) {
+    .badge .badge-val { font-size: 0.95rem; }
+    .be-number-display .big-be { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BE / Stewart Approach Analyzer</h1>
+  <p>簡易版Fencl-Stewart法による塩基過剰の因数分解ツール</p>
+</header>
+
+<main>
+  <!-- ─── INPUT PANEL ─── -->
+  <aside class="input-panel">
+    <div class="section-label">血液ガス分析</div>
+    <div class="input-grid" style="margin-bottom:20px;">
+      <div class="input-field">
+        <label>pH <span class="unit"></span></label>
+        <input type="number" id="pH" step="0.001" value="7.320">
+      </div>
+      <div class="input-field">
+        <label>PaCO₂ <span class="unit">mmHg</span></label>
+        <input type="number" id="pco2" step="0.1" value="38.0">
+      </div>
+      <div class="input-field">
+        <label>HCO₃⁻ <span class="unit">mEq/L</span></label>
+        <input type="number" id="hco3" step="0.1" value="19.0">
+      </div>
+      <div class="input-field">
+        <label>BE <span class="unit">mEq/L</span></label>
+        <input type="number" id="be" step="0.1" value="-8.0">
+      </div>
+    </div>
+
+    <div class="section-label">電解質・生化学</div>
+    <div class="input-grid" style="margin-bottom:20px;">
+      <div class="input-field">
+        <label>Na <span class="unit">mEq/L</span></label>
+        <input type="number" id="na" step="1" value="140">
+      </div>
+      <div class="input-field">
+        <label>K <span class="unit">mEq/L</span></label>
+        <input type="number" id="k" step="0.1" value="4.0">
+      </div>
+      <div class="input-field">
+        <label>Cl <span class="unit">mEq/L</span></label>
+        <input type="number" id="cl" step="1" value="115">
+      </div>
+      <div class="input-field">
+        <label>Alb <span class="unit">g/dL</span></label>
+        <input type="number" id="alb" step="0.1" value="2.5">
+      </div>
+      <div class="input-field full">
+        <label>Lac（乳酸） <span class="unit">mmol/L</span></label>
+        <input type="number" id="lac" step="0.1" value="2.0">
+      </div>
+    </div>
+
+    <div class="section-label">オプション電解質</div>
+    <div class="opt-note">空白のままでも計算します（Mg: 2.0 で固定）</div>
+    <div class="input-grid">
+      <div class="input-field">
+        <label>Mg <span class="unit">mg/dL</span></label>
+        <input type="number" id="mg" step="0.1" placeholder="例: 2.0" class="optional">
+      </div>
+      <div class="input-field">
+        <label>Ca <span class="unit">mg/dL</span></label>
+        <input type="number" id="ca" step="0.1" placeholder="例: 9.0" class="optional">
+      </div>
+      <div class="input-field">
+        <label>P（リン） <span class="unit">mg/dL</span></label>
+        <input type="number" id="ph_p" step="0.1" placeholder="例: 3.5" class="optional">
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── OUTPUT PANEL ─── -->
+  <section class="output-panel">
+
+    <!-- Status badges -->
+    <div class="status-bar" id="statusBar"></div>
+
+    <!-- BE breakdown display -->
+    <div class="card">
+      <div class="card-title">BE 因数分解サマリー</div>
+      <div class="be-gauge-wrap">
+        <div class="be-number-display">
+          <div class="big-be" id="bigBE">—</div>
+          <div class="be-label">Base Excess (mEq/L)</div>
+          <div class="be-explain-sum" id="explainSum"></div>
+        </div>
+        <div class="be-gauge" id="beGaugeWrap">
+          <div class="stacked-bar-container" id="stackedBar"></div>
+          <div style="font-size:0.62rem; color:var(--text-muted); margin-top:6px; text-align:right;">← アシドーシス要因 ｜ アルカローシス要因 →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Factor breakdown grid -->
+    <div class="card">
+      <div class="card-title">各要因の寄与 (mEq/L)</div>
+      <div class="breakdown-grid" id="breakdownGrid"></div>
+    </div>
+
+    <!-- Waterfall chart -->
+    <div class="card">
+      <div class="card-title">ウォーターフォールチャート</div>
+      <div class="chart-wrap">
+        <canvas id="wfChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Attending comment -->
+    <div class="comment-section" id="commentSection">
+      <div class="comment-header">
+        <div class="icon">指</div>
+        <div class="ch-title">指導医コメント（自動生成）</div>
+      </div>
+      <div class="comment-body" id="commentBody"></div>
+    </div>
+
+    <div class="footer-note">
+      本ツールは簡易版Fencl-Stewart法に基づく教育・学習用ツールです。臨床判断の補助として使用してください。<br>
+      Mg効果 = (2.0 − Mg) × 2　　未測定陰イオン(UA) = 入力BE − 説明可能な総和
+    </div>
+
+  </section>
+</main>
+
+<script>
+// ─── CHART INSTANCE ───
+let wfChartInstance = null;
+
+// ─── COLORS ───
+const C = {
+  naCl:  '#0ea5c8',
+  alb:   '#10a872',
+  lac:   '#e03c52',
+  k:     '#8b5cf6',
+  mg:    '#f59e0b',
+  ua:    '#e07c1a',
+  zero:  '#c5d5e8',
+  pos:   '#10a872',
+  neg:   '#e03c52',
+};
+
+// ─── COLLECT INPUTS ───
+function getInputs() {
+  const v = id => {
+    const el = document.getElementById(id);
+    const val = parseFloat(el.value);
+    return isNaN(val) ? null : val;
+  };
+  return {
+    pH:  v('pH')   ?? 7.40,
+    pco2:v('pco2') ?? 40,
+    hco3:v('hco3') ?? 24,
+    be:  v('be')   ?? 0,
+    na:  v('na')   ?? 140,
+    k:   v('k')    ?? 4.0,
+    cl:  v('cl')   ?? 103,
+    alb: v('alb')  ?? 4.2,
+    lac: v('lac')  ?? 1.0,
+    mg:  v('mg'),   // nullable
+    ca:  v('ca'),   // nullable (not used in formula currently)
+    p:   v('ph_p'), // nullable
+  };
+}
+
+// ─── COMPUTE ───
+function compute(inp) {
+  const mgVal = inp.mg ?? 2.0;
+
+  const naCl = (inp.na - inp.cl) - 38;
+  const albE = 2.5 * (4.2 - inp.alb);
+  const lacE = -inp.lac;
+  const kE   = 4.0 - inp.k;
+  const mgE  = (2.0 - mgVal) * 2;
+
+  const explained = naCl + albE + lacE + kE + mgE;
+  const ua = inp.be - explained;
+
+  return { naCl, albE, lacE, kE, mgE, explained, ua, mgVal };
+}
+
+// ─── WATERFALL CHART ───
+function buildWaterfall(inp, res) {
+  const labels = ['Na-Cl', 'Alb', '乳酸', 'K', 'Mg', 'UA', 'BE(実測)'];
+  const factors = [res.naCl, res.albE, res.lacE, res.kE, res.mgE, res.ua, null];
+  const colors  = [C.naCl, C.alb, C.lac, C.k, C.mg, C.ua, null];
+
+  // Build waterfall: each bar is [base, value]
+  // We track running sum for the waterfall
+  const baseData = [];
+  const barData  = [];
+  const barColors = [];
+  let running = 0;
+
+  for (let i = 0; i < 6; i++) {
+    const v = factors[i];
+    const base = v < 0 ? running + v : running;
+    baseData.push(base);
+    barData.push(Math.abs(v));
+    barColors.push(v >= 0 ? C.pos : C.neg);
+    running += v;
+  }
+  // Final bar: actual BE
+  const beBase = inp.be < 0 ? inp.be : 0;
+  baseData.push(beBase);
+  barData.push(Math.abs(inp.be));
+  barColors.push(inp.be >= 0 ? 'rgba(11,24,41,0.7)' : 'rgba(11,24,41,0.5)');
+
+  const ctx = document.getElementById('wfChart').getContext('2d');
+  if (wfChartInstance) wfChartInstance.destroy();
+
+  wfChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'base (invisible)',
+          data: baseData,
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          borderWidth: 0,
+          stack: 's1',
+        },
+        {
+          label: '寄与 (mEq/L)',
+          data: barData,
+          backgroundColor: barColors,
+          borderRadius: 4,
+          borderSkipped: false,
+          stack: 's1',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              if (ctx.datasetIndex === 0) return null;
+              const idx = ctx.dataIndex;
+              const orig = idx < 6 ? factors[idx] : inp.be;
+              return ` ${orig >= 0 ? '+' : ''}${orig.toFixed(2)} mEq/L`;
+            }
+          },
+          backgroundColor: '#0B1829',
+          titleColor: '#fff',
+          bodyColor: '#c5d5e8',
+          borderColor: 'rgba(14,165,200,0.3)',
+          borderWidth: 1,
+          padding: 10,
+          titleFont: { family: 'JetBrains Mono', size: 12 },
+          bodyFont: { family: 'JetBrains Mono', size: 12 },
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { font: { family: 'Inter', size: 11 }, color: '#4a6080' },
+        },
+        y: {
+          stacked: true,
+          grid: { color: 'rgba(197,213,232,0.4)', lineWidth: 1 },
+          ticks: {
+            font: { family: 'JetBrains Mono', size: 10 },
+            color: '#4a6080',
+            callback: v => (v > 0 ? '+' : '') + v
+          },
+          border: { dash: [3,3] },
+        }
+      }
+    }
+  });
+}
+
+// ─── STATUS BADGES ───
+function buildStatus(inp) {
+  const pH = inp.pH;
+  let phClass = 'neutral-ph', phLabel = '正常域';
+  if (pH < 7.35) { phClass = 'acidemia'; phLabel = 'アシデミア'; }
+  else if (pH > 7.45) { phClass = 'alkalemia'; phLabel = 'アルカレミア'; }
+
+  let beClass = 'badge', beLabel = '正常';
+  if (inp.be < -2) { beClass = 'badge acidemia'; beLabel = '代謝性アシドーシス'; }
+  else if (inp.be > 2) { beClass = 'badge alkalemia'; beLabel = '代謝性アルカローシス'; }
+
+  let ventClass = 'badge', ventLabel = '正常換気';
+  if (inp.pco2 < 35) { ventClass = 'badge alkalemia'; ventLabel = '過換気'; }
+  else if (inp.pco2 > 45) { ventClass = 'badge acidemia'; ventLabel = '低換気'; }
+
+  document.getElementById('statusBar').innerHTML = `
+    <div class="badge ${phClass}">
+      <span class="badge-label">pH</span>
+      <span class="badge-val">${pH.toFixed(3)}</span>
+    </div>
+    <div class="${beClass}">
+      <span class="badge-label">BE</span>
+      <span class="badge-val">${inp.be > 0 ? '+' : ''}${inp.be.toFixed(1)}</span>
+    </div>
+    <div class="badge">
+      <span class="badge-label">PaCO₂</span>
+      <span class="badge-val">${inp.pco2.toFixed(0)}</span>
+    </div>
+    <div class="badge">
+      <span class="badge-label">HCO₃⁻</span>
+      <span class="badge-val">${inp.hco3.toFixed(1)}</span>
+    </div>
+  `;
+}
+
+// ─── BE SUMMARY ───
+function buildBESummary(inp, res) {
+  const be = inp.be;
+  const beEl = document.getElementById('bigBE');
+  beEl.textContent = (be > 0 ? '+' : '') + be.toFixed(1);
+  beEl.className = 'big-be ' + (be < -2 ? 'acid' : be > 2 ? 'base' : 'norm');
+
+  document.getElementById('explainSum').textContent =
+    `説明可能な総和: ${res.explained >= 0 ? '+' : ''}${res.explained.toFixed(2)} mEq/L`;
+
+  // Stacked bar
+  const total = Math.max(Math.abs(be) + 2, 10);
+  const factors = [
+    { val: res.naCl, col: C.naCl  },
+    { val: res.albE, col: C.alb   },
+    { val: res.lacE, col: C.lac   },
+    { val: res.kE,   col: C.k     },
+    { val: res.mgE,  col: C.mg    },
+    { val: res.ua,   col: C.ua    },
+  ];
+  const container = document.getElementById('stackedBar');
+  // zero line position = 50% if balanced, else clamp
+  const zeroAt = 50; // We normalize around zero
+
+  // Build segments
+  const pos = factors.filter(f => f.val > 0);
+  const neg = factors.filter(f => f.val < 0);
+  const posSum = pos.reduce((a, f) => a + f.val, 0);
+  const negSum = Math.abs(neg.reduce((a, f) => a + f.val, 0));
+  const scale = (val) => (Math.abs(val) / total) * 100;
+
+  let html = '';
+  // Zero line at midpoint of range
+  const maxAbs = Math.max(posSum, negSum, Math.abs(be), 1);
+  const zeroPct = (negSum / (negSum + posSum + 0.001)) * 100;
+
+  // Negative factors left side
+  neg.forEach(f => {
+    html += `<div class="stacked-seg" style="width:${scale(f.val)}%;background:${f.col};opacity:0.85;"></div>`;
+  });
+  // Gap (zero)
+  const gapW = 100 - neg.reduce((a, f) => a + scale(f.val), 0) - pos.reduce((a, f) => a + scale(f.val), 0);
+  if (gapW > 0) html += `<div class="stacked-seg" style="width:${gapW}%;background:#e4ecf5;"></div>`;
+  // Positive factors right side
+  pos.forEach(f => {
+    html += `<div class="stacked-seg" style="width:${scale(f.val)}%;background:${f.col};opacity:0.85;"></div>`;
+  });
+  container.innerHTML = html;
+}
+
+// ─── FACTOR BREAKDOWN GRID ───
+function buildBreakdownGrid(inp, res) {
+  const rows = [
+    { name: 'Na-Cl バランス', val: res.naCl, col: C.naCl, detail: `(${inp.na}−${inp.cl})−38` },
+    { name: 'Alb 補正',       val: res.albE, col: C.alb,  detail: `2.5×(4.2−${inp.alb})` },
+    { name: '乳酸',           val: res.lacE, col: C.lac,  detail: `−${inp.lac}` },
+    { name: 'K',              val: res.kE,   col: C.k,    detail: `4.0−${inp.k}` },
+    { name: 'Mg',             val: res.mgE,  col: C.mg,   detail: `(2.0−${res.mgVal})×2` },
+    { name: '未測定陰イオン(UA)', val: res.ua, col: C.ua, detail: `BE−説明可能` },
+  ];
+
+  document.getElementById('breakdownGrid').innerHTML = rows.map(r => {
+    const cls = r.val > 0.1 ? 'pos' : r.val < -0.1 ? 'neg' : 'neutral';
+    const sign = r.val > 0 ? '+' : '';
+    return `
+      <div class="factor-row">
+        <div class="factor-dot" style="background:${r.col};"></div>
+        <div class="factor-name">${r.name}<br><span style="font-size:0.6rem;color:#8899b0;">${r.detail}</span></div>
+        <div class="factor-val ${cls}">${sign}${r.val.toFixed(2)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── GENERATE COMMENT ───
+function buildComment(inp, res) {
+  const pH = inp.pH;
+  const be = inp.be;
+  const be_s = (be >= 0 ? '+' : '') + be.toFixed(1);
+  const exp_s = (res.explained >= 0 ? '+' : '') + res.explained.toFixed(2);
+  const ua_s  = (res.ua >= 0 ? '+' : '') + res.ua.toFixed(2);
+
+  // 1. pH and BE status
+  let phStatus = 'pH 7.35〜7.45 の正常域';
+  let phCls = '';
+  if (pH < 7.35) { phStatus = `<span class="emph acid">アシデミア</span>`; phCls = 'highlight-acid'; }
+  else if (pH > 7.45) { phStatus = `<span class="emph base">アルカレミア</span>`; phCls = 'highlight-base'; }
+
+  let beStatus = '正常範囲';
+  if (be < -2) beStatus = `<span class="emph acid">代謝性アシドーシス</span>`;
+  else if (be > 2) beStatus = `<span class="emph base">代謝性アルカローシス</span>`;
+
+  let pco2Comment = '';
+  if (inp.pco2 < 35) pco2Comment = `PaCO₂ <span class="emph base">${inp.pco2} mmHg</span> と低値であり、呼吸性代償（または呼吸性アルカローシス）を伴っています。`;
+  else if (inp.pco2 > 45) pco2Comment = `PaCO₂ <span class="emph acid">${inp.pco2} mmHg</span> と高値であり、呼吸性アシドーシスまたは代謝性アルカローシスへの代償が示唆されます。`;
+  else pco2Comment = `PaCO₂ ${inp.pco2} mmHg は正常換気域であり、呼吸性成分の寄与は最小限です。`;
+
+  const para1 = `
+    pHは <span class="emph">${pH.toFixed(3)}</span>、BEは <span class="emph">${be_s} mEq/L</span> であり、${phStatus} です（代謝成分の評価として ${beStatus}）。${pco2Comment}
+  `;
+
+  // 2. Factor breakdown
+  const factLines = [];
+  const fmt = (v) => (v >= 0 ? '+' : '') + v.toFixed(2);
+  const dir = (v, label) => {
+    if (Math.abs(v) < 0.1) return `${label} の寄与はほぼゼロ（${fmt(v)} mEq/L）`;
+    const dir_word = v > 0 ? `<span class="emph base">アルカローシス要因</span>` : `<span class="emph acid">アシドーシス要因</span>`;
+    return `${label} により ${dir_word} <span class="emph">${fmt(v)} mEq/L</span>`;
+  };
+
+  factLines.push(dir(res.naCl, `Na-Cl バランス（Na=${inp.na}, Cl=${inp.cl}）`));
+  if (inp.alb !== 4.2) factLines.push(dir(res.albE, `低アルブミン血症（Alb=${inp.alb} g/dL）`));
+  else factLines.push(`Alb は正常値（4.2 g/dL）のため Alb 効果はゼロ`);
+  factLines.push(dir(res.lacE, `乳酸（${inp.lac} mmol/L）`));
+  if (Math.abs(res.kE) > 0.1) factLines.push(dir(res.kE, `K（${inp.k} mEq/L）`));
+  if (inp.mg !== null && Math.abs(res.mgE) > 0.1) factLines.push(dir(res.mgE, `Mg（${inp.mg} mg/dL）`));
+
+  const para2 = `要因の因数分解を行うと：<br><br>` + factLines.map(l => `・${l}`).join('<br>') + `<br><br>説明可能な要因の総和は <span class="emph">${exp_s} mEq/L</span> となります。`;
+
+  // 3. UA interpretation
+  const uaAbs = Math.abs(res.ua);
+  let para3 = '', para3cls = '';
+  if (uaAbs < 2) {
+    para3 = `実際の BE（<span class="emph">${be_s}</span>）と説明可能な要因（<span class="emph">${exp_s}</span>）の差は <span class="emph">${ua_s} mEq/L</span> と誤差範囲内です。<strong>測定された電解質・代謝物でほぼ説明がつきます。</strong>追加の未測定陰イオン蓄積を積極的に疑う必要はありません。`;
+    para3cls = 'highlight-ok';
+  } else if (res.ua < -2) {
+    const severity = uaAbs > 8 ? '高度' : uaAbs > 4 ? '中等度' : '軽度';
+    para3 = `実際の BE（<span class="emph">${be_s}</span>）と説明可能な要因（<span class="emph">${exp_s}</span>）を比較すると、<span class="emph ua">${ua_s} mEq/L</span> の差（${severity}な未測定陰イオンによるアシドーシス要因）があります。<br><br>これはケトン体・尿毒症性有機酸・サリチル酸・メタノール代謝産物などの<strong>特殊な陰イオンの蓄積</strong>を示唆します。血中ケトン体・BUN/Cr・トキシコロジーの検索を検討してください。`;
+    para3cls = 'highlight-ua';
+  } else {
+    para3 = `実際の BE（<span class="emph">${be_s}</span>）と説明可能な要因（<span class="emph">${exp_s}</span>）の差は <span class="emph">${ua_s} mEq/L</span> であり、軽度の未説明陽イオン過剰が示唆されます。臨床文脈と合わせて判断してください。`;
+    para3cls = 'highlight-ok';
+  }
+
+  // 4. Clinical synthesis
+  let para4 = '';
+  const isHyperCl = res.naCl < -3;
+  const isHypoAlb = res.albE > 2;
+  const isHighLac = inp.lac > 2;
+  const hasUA = res.ua < -3;
+
+  const features = [];
+  if (isHyperCl) features.push('高Cl性代謝性アシドーシス（例：大量生食輸液、下痢、腎尿細管性アシドーシス）');
+  if (isHypoAlb) features.push('低アルブミン血症によるアルカローシス寄与（真のアシドーシスを見かけ上マスクしている可能性）');
+  if (isHighLac) features.push(`乳酸アシドーシスの要素（Lac=${inp.lac} mmol/L）`);
+  if (hasUA) features.push('未測定陰イオンによるアシドーシス（ケトアシドーシス・尿毒症等を鑑別）');
+
+  if (features.length > 0) {
+    para4 = `臨床的な重要ポイント：<br>` + features.map(f => `・${f}`).join('<br>');
+  }
+
+  const commentBody = document.getElementById('commentBody');
+  commentBody.innerHTML = [
+    `<div class="comment-para ${phCls}">${para1}</div>`,
+    `<div class="comment-para">${para2}</div>`,
+    `<div class="comment-para ${para3cls}">${para3}</div>`,
+    para4 ? `<div class="comment-para">${para4}</div>` : '',
+  ].join('');
+}
+
+// ─── MAIN RENDER ───
+function render() {
+  const inp = getInputs();
+  const res = compute(inp);
+  buildStatus(inp);
+  buildBESummary(inp, res);
+  buildBreakdownGrid(inp, res);
+  buildComment(inp, res);
+  buildWaterfall(inp, res);
+}
+
+// ─── EVENT LISTENERS ───
+document.querySelectorAll('input').forEach(el => {
+  el.addEventListener('input', () => { render(); });
+});
+
+// ─── INIT ───
+render();
+</script>
+</body>
+</html>
